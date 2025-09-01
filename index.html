@@ -214,30 +214,39 @@
             if (!list.length) { poemTitle.textContent = "Aún sin publicar"; poemMeta.textContent = "—"; poemBody.textContent = ""; return }
             const p = list[0];
             poemTitle.textContent = p.title;
-            function parseLocalDate(str) {
-                const [y, m, d] = str.split("-").map(Number);
-                return new Date(y, m - 1, d); // crea fecha local (no UTC)
-            }
 
             poemMeta.textContent = `Publicada el ${fmt(parseLocalDate(p.date))}`;
             poemBody.textContent = p.body;
         }
+        function parseLocalDate(str) {
+            const [y, m, d] = str.split("-").map(Number);
+            return new Date(y, m - 1, d); // fecha local (no UTC)
+        }
 
         function renderArchive(filter = "") {
-            const list = [...DATA.poemas].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const list = [...DATA.poemas].sort((a, b) => parseLocalDate(b.date) - parseLocalDate(a.date));
             const qf = filter.trim().toLowerCase();
             const filtered = qf ? list.filter(p => (p.title + p.body).toLowerCase().includes(qf)) : list;
+
             archive.innerHTML = "";
-            if (!filtered.length) { archive.innerHTML = "<p>No hay poemas.</p>"; return }
+            if (!filtered.length) {
+                archive.innerHTML = "<p>No hay poemas.</p>";
+                return;
+            }
+
             filtered.forEach(p => {
                 const el = document.createElement("details");
-                el.innerHTML = `<summary><strong>${p.title}</strong> 
-          <span class="poem-date">— ${fmt(new Date(p.date))}${p.visible === "borrador" ? " · borrador" : ""}</span></summary>
+                el.innerHTML = `
+          <summary><strong>${p.title}</strong> 
+            <span class="poem-date">— ${fmt(parseLocalDate(p.date))}${p.visible === "borrador" ? " · borrador" : ""}</span>
+          </summary>
           <div class="divider"></div>
-          <div class="poem-body">${(p.body || "").replace(/\n/g, "<br>")}</div>`;
+          <div class="poem-body">${(p.body || "").replace(/\n/g, "<br>")}</div>
+        `;
                 archive.appendChild(el);
             });
         }
+
 
         q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); renderArchive(q.value) } });
 
