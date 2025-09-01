@@ -178,6 +178,7 @@
                     "title": "Te quiero",
                     "date": "2025-08-31",
                     "body": "Lilian,\nte quiero no solo en los días claros,\nsino también en las horas grises.\n\nTe quiero porque tu risa me abre caminos,\ny tu silencio me guarda en paz.\n\nTe quiero en lo simple y lo profundo,\nen el abrazo que calma,\ny en la palabra que sostiene.\n\nTe quiero porque contigo\nla vida es más vida,\ny el amor, más verdadero.",
+                    "author": "Author: Mario Benedetti",
                     "visible": "auto"
                 }
             ]
@@ -211,13 +212,23 @@
 
         function renderCurrent() {
             const list = visibles(DATA.poemas);
-            if (!list.length) { poemTitle.textContent = "Aún sin publicar"; poemMeta.textContent = "—"; poemBody.textContent = ""; return }
+            if (!list.length) {
+                poemTitle.textContent = "Aún sin publicar";
+                poemMeta.textContent = "—";
+                poemBody.textContent = "";
+                return;
+            }
+
             const p = list[0];
             poemTitle.textContent = p.title;
 
-            poemMeta.textContent = `Publicada el ${fmt(parseLocalDate(p.date))}`;
+            // Mostrar fecha + autor si existe
+            poemMeta.textContent = `Publicada el ${fmt(parseLocalDate(p.date))}${p.author ? " · " + p.author : ""}`;
+
             poemBody.textContent = p.body;
         }
+
+
         function parseLocalDate(str) {
             const [y, m, d] = str.split("-").map(Number);
             return new Date(y, m - 1, d); // fecha local (no UTC)
@@ -237,8 +248,13 @@
             filtered.forEach(p => {
                 const el = document.createElement("details");
                 el.innerHTML = `
-          <summary><strong>${p.title}</strong> 
-            <span class="poem-date">— ${fmt(parseLocalDate(p.date))}${p.visible === "borrador" ? " · borrador" : ""}</span>
+          <summary>
+            <strong>${p.title}</strong> 
+            <span class="poem-date">
+              — ${fmt(parseLocalDate(p.date))}
+              ${p.visible === "borrador" ? " · borrador" : ""}
+              ${p.author ? " · " + p.author : ""}
+            </span>
           </summary>
           <div class="divider"></div>
           <div class="poem-body">${(p.body || "").replace(/\n/g, "<br>")}</div>
