@@ -208,12 +208,18 @@
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
         }
 
+
         function renderCurrent() {
             const list = visibles(DATA.poemas);
             if (!list.length) { poemTitle.textContent = "Aún sin publicar"; poemMeta.textContent = "—"; poemBody.textContent = ""; return }
             const p = list[0];
             poemTitle.textContent = p.title;
-            poemMeta.textContent = `Publicada el ${fmt(new Date(p.date))}`;
+            function parseLocalDate(str) {
+                const [y, m, d] = str.split("-").map(Number);
+                return new Date(y, m - 1, d); // crea fecha local (no UTC)
+            }
+
+            poemMeta.textContent = `Publicada el ${fmt(parseLocalDate(p.date))}`;
             poemBody.textContent = p.body;
         }
 
